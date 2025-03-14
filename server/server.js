@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { GoogleSpreadsheet } = require("google-spreadsheet");
+const { google } = require("googleapis");
 const path = require("path");
 
 const app = express();
@@ -12,68 +12,96 @@ const SPREADSHEET_ID = "1FlJlC5Zhy_Lbo3CJ__fYL9O5s56KAYbivjYl25DHyZs"; // Зам
 const CREDENTIALS = require("./credentials.json"); // Шлях до ключа API
 
 // Функція для додавання даних до Google Таблиці
-async function addToSheet(fullName, email) {
-  const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-  console.log("Підключено до Google Таблиці з ID:", SPREADSHEET_ID);
-
-  // Автентифікація за допомогою сервісного акаунта
+async function addToSheet(fullName, email, role) {
   try {
-    await doc.useServiceAccountAuth({
-      client_email: CREDENTIALS.client_email,
-      private_key: CREDENTIALS.private_key,
+    // Автентифікація
+    const auth = new google.auth.GoogleAuth({
+      credentials: CREDENTIALS,
+      scopes: "https://www.googleapis.com/auth/spreadsheets",
     });
-    console.log("Автентифікація успішна");
-  } catch (authError) {
-    console.error("Помилка автентифікації:", authError);
-    throw new Error("Помилка автентифікації");
-  }
 
-  // Завантаження інформації про таблицю
-  try {
-    await doc.loadInfo();
-    console.log("Інформація про таблицю завантажена");
-  } catch (loadError) {
-    console.error("Помилка завантаження інформації про таблицю:", loadError);
-    throw new Error("Помилка завантаження інформації про таблицю");
-  }
+    // Створення клієнта для автентифікації
+    const client = await auth.getClient();
 
-  // Отримуємо лист "Контактні данні"
-  const sheet = doc.sheetsByTitle["Контактні данні"];
-  if (!sheet) {
-    console.error("Лист 'Контактні данні' не знайдено.");
-    throw new Error("Лист 'Контактні данні' не знайдено.");
-  }
-  console.log("Лист 'Контактні данні' знайдено");
+    // Ініціалізація Google Sheets API
+    const googleSheets = google.sheets({ version: "v4", auth: client });
 
-  // Перевірка наявності заголовків
-  if (sheet.headerValues.length === 0) {
-    console.log("Заголовки відсутні. Додаємо заголовки...");
-    try {
-      await sheet.setHeaderRow(["КУРСАНТ ПІБ", "Email"]);
-      console.log("Заголовки успішно додані");
-    } catch (headerError) {
-      console.error("Помилка додавання заголовків:", headerError);
-      throw new Error("Помилка додавання заголовків");
+    // Отримання заголовків колонок
+    const headersResponse = await googleSheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: "Контактні данні!1:1", // Отримуємо перший рядок (заголовки)
+    });
+
+    const headers = headersResponse.data.values[0]; // Заголовки колонок
+    console.log("Заголовки колонок:", headers); // Логуємо заголовки
+
+    // Нормалізація назв колонок (видалення зайвих пробілів)
+    const normalizedHeaders = headers.map((header) => header.trim());
+
+    // Знаходження індексів колонок за назвами
+    const fullNameColumnIndex = headers.indexOf("ПІБ"); // Шукаємо колонку "ПІБ"
+    const emailColumnIndex = headers.indexOf("Email"); // Шукаємо колонку "Email"
+    const groupLeaderColumnIndex = headers.indexOf("Старший групи"); // Шукаємо колонку "Старший групи"
+
+    console.log("Індекс колонки 'ПІБ':", fullNameColumnIndex); // Логуємо індекс
+    console.log("Індекс колонки 'Email':", emailColumnIndex); // Логуємо індекс
+    console.log("Індекс колонки 'Старший групи':", groupLeaderColumnIndex); //Логуємо індекс
+    console.log("Нормалізовані заголовки:", normalizedHeaders); // Нормалізовані заголовки
+
+    // Перевірка, чи знайдені колонки
+    if (
+      fullNameColumnIndex === -1 ||
+      emailColumnIndex === -1 ||
+      groupLeaderColumnIndex === -1
+    ) {
+      throw new Error(
+        "Колонки 'ПІБ', 'Email' або 'Старший групи не знайдені'."
+      );
     }
-  }
 
-  // Додаємо дані до листа
-  try {
-    await sheet.addRow({ "КУРСАНТ ПІБ": fullName, Email: email });
+    // Отримання останнього рядка з даними
+    const dataResponse = await googleSheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: "Контактні данні", // Отримуємо всі дані з листа
+    });
+
+    const lastRowIndex = dataResponse.data.values
+      ? dataResponse.data.values.length + 1
+      : 1;
+
+    // Створення масиву даних для нового рядка
+    const newRow = headers.map((header, index) => {
+      if (index === fullNameColumnIndex) return fullName; // Додаємо ПІБ
+      if (index === emailColumnIndex) return email; // Додаємо Email
+      if (index === groupLeaderColumnIndex && role === "Старший групи")
+        return fullName; // Додаємо ПІБ Старшого групи
+      return ""; // Пусті значення для інших колонок
+    });
+
+    // Додавання нового рядка
+    await googleSheets.spreadsheets.values.append({
+      spreadsheetId: SPREADSHEET_ID,
+      range: "Контактні данні", // Діапазон для додавання
+      valueInputOption: "USER_ENTERED",
+      resource: {
+        values: [newRow], // Дані для додавання
+      },
+    });
+
     console.log("Дані успішно додані до таблиці");
-  } catch (addRowError) {
-    console.error("Помилка додавання рядка:", addRowError);
-    throw new Error("Помилка додавання рядка");
+  } catch (error) {
+    console.error("Помилка при додаванні до таблиці:", error);
+    throw new Error("Помилка при додаванні до таблиці");
   }
 }
 
 // Маршрут для обробки POST-запитів
 app.post("/submit", async (req, res) => {
-  const { fullName, email } = req.body;
-  console.log("Отримано дані:", { fullName, email }); // Логування отриманих даних
+  const { fullName, email, role } = req.body;
+  console.log("Отримано дані:", { fullName, email, role }); // Логування отриманих даних
 
   try {
-    await addToSheet(fullName, email);
+    await addToSheet(fullName, email, role);
     console.log("Дані успішно додані до таблиці"); // Логування успіху
     res.json({ success: true, message: "Дані успішно додані!" });
   } catch (error) {

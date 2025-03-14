@@ -58,6 +58,7 @@ const RegistrationStep1 = ({ onNext }) => {
         body: JSON.stringify({
           fullName,
           email: formData.email,
+          role: formData.role, // Додаємо роль до тіла запиту
         }),
       });
 
@@ -147,6 +148,7 @@ const RegistrationStep1 = ({ onNext }) => {
           required
         >
           <option value="">Оберіть роль</option>
+          <option value="Старший групи">Старший групи</option>
           <option value="Курсант">Курсант</option>
           <option value="Інструктор">Інструктор</option>
         </select>
