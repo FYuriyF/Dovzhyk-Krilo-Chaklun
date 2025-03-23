@@ -1,0 +1,187 @@
+/* Основний контейнер форми */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: orange;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Рядок для двох полів (дати, військова частина та ПІБ командира) */
+.row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.row > div {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Поля введення */
+.inputField {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  height: 40px; /* Фіксована висота для всіх полів */
+}
+
+.inputField:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  outline: none;
+}
+
+/* Контейнер для дат (початок та закінчення занять) */
+.dateRow {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
+.dateContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Контейнер для великих полів (Номер бригади та ПІБ командира) */
+.largeInputContainer {
+  flex: 3; /* Збільшуємо ширину */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Контейнер для малих полів (Військова частина та телефон командира) */
+.smallInputContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Лейбли для полів */
+.label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+/* Повідомлення про помилку */
+.errorMessage {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Контейнер для телефону */
+.phoneInputContainer {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  height: 40px; /* Фіксована висота, як у інших полів */
+  transition: border-color 0.3s ease;
+}
+
+.phoneInputContainer:focus-within {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.phonePrefix {
+  font-size: 14px;
+  color: #555;
+  margin-right: 5px;
+}
+
+.phoneInputField {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  font-size: 14px;
+  outline: none;
+}
+
+/* Кнопка "Завершити" */
+.nextButton {
+  padding: 12px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.nextButton:hover {
+  background-color: #0056b3;
+}
+
+/* Контейнер для радіокнопок */
+.radioGroupContainer {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* Група радіокнопок */
+.radioGroup {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center; /* Вирівнюємо радіокнопки по центру */
+}
+
+/* Окрема радіокнопка */
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+}
+
+.radioOption input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Стилі для DatePicker */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  height: 40px; /* Фіксована висота, як у інших полів */
+}
+
+.react-datepicker__input-container input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  outline: none;
+}

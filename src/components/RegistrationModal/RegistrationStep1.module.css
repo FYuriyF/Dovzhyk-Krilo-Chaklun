@@ -2,48 +2,82 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Відстань між елементами форми */
+  gap: 20px;
+  color: orange;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Рядок для трьох полів (ПІБ) */
-.row {
+/* Контейнер для ПІБ (Прізвище, Ім'я, По батькові) */
+.nameContainer {
   display: flex;
-  gap: 10px; /* Відстань між полями */
+  gap: 15px;
 }
 
-.row > div {
-  flex: 1; /* Рівномірний розподіл простору */
+.nameField {
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+/* Контейнер для Email, Позивного та Телефону */
+.contactContainer {
+  display: flex;
+  gap: 15px;
+}
+
+.emailField {
+  flex: 2; /* Збільшуємо ширину для Email */
+  display: flex;
+  flex-direction: column;
+}
+
+.callsignField {
+  flex: 2; /* Збільшуємо ширину для Позивного */
+  display: flex;
+  flex-direction: column;
+}
+
+.phoneField {
+  flex: 1; /* Зменшуємо ширину для Телефону */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Контейнер для Ролі */
+.roleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* Поля введення */
 .inputField {
-  padding: 10px;
+  padding: 8px 12px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 6px;
   font-size: 14px;
   width: 100%;
-  box-sizing: border-box; /* Щоб padding не впливав на ширину */
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  height: 40px;
 }
 
 .inputField:focus {
   border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
   outline: none;
 }
 
-/* Лейбли для полів */
-.label {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 5px;
-}
-
-/* Випадаюче меню */
+/* Випадаюче меню для ролі */
 .selectField {
-  padding: 10px;
+  padding: 8px 12px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 6px;
   font-size: 14px;
   width: 100%;
   background-color: white;
@@ -55,18 +89,50 @@
   outline: none;
 }
 
+/* Контейнер для телефону */
+.phoneInputContainer {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  height: 40px;
+  transition: border-color 0.3s ease;
+}
+
+.phoneInputContainer:focus-within {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.phonePrefix {
+  font-size: 14px;
+  color: #555;
+  margin-right: 5px;
+}
+
+.phoneInputField {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  font-size: 14px;
+  outline: none;
+}
+
 /* Кнопка "Далі" */
 .nextButton {
-  padding: 10px;
+  padding: 12px 20px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   width: 100%;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .nextButton:hover {

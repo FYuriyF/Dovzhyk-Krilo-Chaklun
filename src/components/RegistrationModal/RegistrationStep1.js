@@ -1,165 +1,148 @@
-import React, { useState } from "react";
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import styles from "./RegistrationStep1.module.css";
 
+const Step1Schema = Yup.object().shape({
+  lastName: Yup.string().required("Прізвище обов'язкове"),
+  firstName: Yup.string().required("Ім'я обов'язкове"),
+  email: Yup.string()
+    .email("Невірний формат email")
+    .required("Email обов'язковий"),
+  phone: Yup.string()
+    .matches(
+      /^0\d{9}$/,
+      "Номер телефону повинен починатися з 0 та містити 10 цифр"
+    )
+    .required("Номер телефону обов'язковий"),
+  role: Yup.string().required("Роль обов'язкова"),
+});
+
 const RegistrationStep1 = ({ onNext }) => {
-  const [formData, setFormData] = useState({
-    lastName: "",
-    firstName: "",
-    middleName: "",
-    email: "",
-    role: "",
-  });
-
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.lastName) newErrors.lastName = "Прізвище обов'язкове";
-    if (!formData.firstName) newErrors.firstName = "Ім'я обов'язкове";
-    if (!formData.email) newErrors.email = "Email обов'язковий";
-    if (!formData.role) newErrors.role = "Роль обов'язкова";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    // Форматування ПІБ (перша літера велика)
-    const formattedLastName =
-      formData.lastName.charAt(0).toUpperCase() + formData.lastName.slice(1);
-    const formattedFirstName =
-      formData.firstName.charAt(0).toUpperCase() + formData.firstName.slice(1);
-    const formattedMiddleName =
-      formData.middleName.charAt(0).toUpperCase() +
-      formData.middleName.slice(1);
-
-    const fullName = `${formattedLastName} ${formattedFirstName} ${formattedMiddleName}`;
-
-    // Відправка даних на сервер
-    try {
-      const response = await fetch("http://localhost:3001/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName,
-          email: formData.email,
-          role: formData.role, // Додаємо роль до тіла запиту
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log("Відповідь від сервера:", result);
-        alert("Дані успішно відправлені!");
-        onNext(); // Перехід до наступного кроку
-      } else {
-        console.error("Помилка при відправці даних:", response.statusText);
-        alert("Помилка при відправці даних.");
-      }
-    } catch (error) {
-      console.error("Помилка:", error);
-      alert("Щось пішло не так.");
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <h2>Крок 1: Введіть ваші дані</h2>
-      <div className={styles.row}>
-        <div>
-          <label className={styles.label}>Прізвище:</label>
-          <input
-            type="text"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
-          />
-          {errors.lastName && (
-            <span className={styles.errorMessage}>{errors.lastName}</span>
-          )}
-        </div>
-        <div>
-          <label className={styles.label}>Ім'я:</label>
-          <input
-            type="text"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
-          />
-          {errors.firstName && (
-            <span className={styles.errorMessage}>{errors.firstName}</span>
-          )}
-        </div>
-        <div>
-          <label className={styles.label}>По батькові:</label>
-          <input
-            type="text"
-            name="middleName"
-            value={formData.middleName}
-            onChange={handleChange}
-            className={styles.inputField}
-            required
-          />
-          {errors.middleName && (
-            <span className={styles.errorMessage}>{errors.middleName}</span>
-          )}
-        </div>
-      </div>
-      <div>
-        <label className={styles.label}>Email:</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className={styles.inputField}
-          required
-        />
-        {errors.email && (
-          <span className={styles.errorMessage}>{errors.email}</span>
-        )}
-      </div>
-      <div>
-        <label className={styles.label}>Роль:</label>
-        <select
-          name="role"
-          value={formData.role}
-          onChange={handleChange}
-          className={styles.selectField}
-          required
-        >
-          <option value="">Оберіть роль</option>
-          <option value="Старший групи">Старший групи</option>
-          <option value="Курсант">Курсант</option>
-          <option value="Інструктор">Інструктор</option>
-        </select>
-        {errors.role && (
-          <span className={styles.errorMessage}>{errors.role}</span>
-        )}
-      </div>
-      <button type="submit" className={styles.nextButton}>
-        Далі
-      </button>
-    </form>
+    <Formik
+      initialValues={{
+        lastName: "",
+        firstName: "",
+        middleName: "",
+        email: "",
+        callsign: "",
+        phone: "",
+        role: "",
+      }}
+      validationSchema={Step1Schema}
+      onSubmit={(values) => {
+        console.log("Дані форми:", values);
+        onNext();
+      }}
+    >
+      {() => (
+        <Form className={styles.form}>
+          <h2>Крок 1: Введіть ваші дані</h2>
+
+          {/* Контейнер для ПІБ (Прізвище, Ім'я, По батькові) */}
+          <div className={styles.nameContainer}>
+            <div className={styles.nameField}>
+              <label className={styles.label}>Прізвище:</label>
+              <Field
+                type="text"
+                name="lastName"
+                className={styles.inputField}
+              />
+              <ErrorMessage
+                name="lastName"
+                component="span"
+                className={styles.errorMessage}
+              />
+            </div>
+            <div className={styles.nameField}>
+              <label className={styles.label}>Ім'я:</label>
+              <Field
+                type="text"
+                name="firstName"
+                className={styles.inputField}
+              />
+              <ErrorMessage
+                name="firstName"
+                component="span"
+                className={styles.errorMessage}
+              />
+            </div>
+            <div className={styles.nameField}>
+              <label className={styles.label}>По батькові:</label>
+              <Field
+                type="text"
+                name="middleName"
+                className={styles.inputField}
+              />
+              <ErrorMessage
+                name="middleName"
+                component="span"
+                className={styles.errorMessage}
+              />
+            </div>
+          </div>
+
+          {/* Контейнер для Email, Позивного та Телефону */}
+          <div className={styles.contactContainer}>
+            <div className={styles.emailField}>
+              <label className={styles.label}>Email:</label>
+              <Field type="email" name="email" className={styles.inputField} />
+              <ErrorMessage
+                name="email"
+                component="span"
+                className={styles.errorMessage}
+              />
+            </div>
+            <div className={styles.callsignField}>
+              <label className={styles.label}>Позивний:</label>
+              <Field
+                type="text"
+                name="callsign"
+                className={styles.inputField}
+              />
+            </div>
+            <div className={styles.phoneField}>
+              <label className={styles.label}>Телефон:</label>
+              <div className={styles.phoneInputContainer}>
+                <span className={styles.phonePrefix}>+38</span>
+                <Field
+                  type="tel"
+                  name="phone"
+                  className={styles.phoneInputField}
+                  placeholder="0XXXXXXXXX"
+                />
+              </div>
+              <ErrorMessage
+                name="phone"
+                component="span"
+                className={styles.errorMessage}
+              />
+            </div>
+          </div>
+
+          {/* Контейнер для Ролі */}
+          <div className={styles.roleContainer}>
+            <label className={styles.label}>Роль:</label>
+            <Field as="select" name="role" className={styles.selectField}>
+              <option value="">Оберіть роль</option>
+              <option value="Старший групи">Старший групи</option>
+              <option value="Курсант">Курсант</option>
+              <option value="Інструктор">Інструктор</option>
+            </Field>
+            <ErrorMessage
+              name="role"
+              component="span"
+              className={styles.errorMessage}
+            />
+          </div>
+
+          <button type="submit" className={styles.nextButton}>
+            Далі
+          </button>
+        </Form>
+      )}
+    </Formik>
   );
 };
 
